@@ -3,17 +3,20 @@ const db = require('./connection');
 let querys = {
     getproducto: 'SELECT * FROM producto',
     getproductoID: 'SELECT * FROM producto WHERE id = ?',
+    getimagenID: 'SELECT * FROM imagen WHERE id = ?',
     insertproducto: 'INSERT INTO producto (code, name, brand, model, description, price, category_id) VALUES(?, ?, ?, ?, ?, ?, ?)',
     getimagen: 'SELECT * FROM imagen',
     getcategory: 'SELECT * FROM category',
+    getcategoryID: 'SELECT * FROM category WHERE id = ?',
     insertimagen: 'INSERT INTO imagen (url, producto_id, destacado) VALUES(?, ?, ?)',
-    insertcategory: 'INSERT INTO category(category_id, name, id) VALUES(?, ?)',
+    insertcategory: 'INSERT INTO category(name) VALUES(?)',
     updateproducto: 'UPDATE producto SET code = ?, name = ?, brand = ?, model = ?, description = ?, price = ?, category_id = ? WHERE id = ?',
     updateimagen: 'UPDATE imagen SET url = ?, producto_id = ?, destacado = ? WHERE id = ?',
-    updatecategory: 'UPDATE category SET category_id = ?, name = ? WHERE id = ?',
+    updatecategory: 'UPDATE category SET name = ? WHERE id = ?',
     deleteproducto: 'DELETE FROM producto WHERE id = ?',
     deleteimagen: 'DELETE FROM imagen WHERE id = ?',
     deletecategory: 'DELETE FROM category WHERE id = ?'
+
 }
 module.exports = {
     getproducto(){
@@ -73,9 +76,9 @@ module.exports = {
     },
 
 
-    getimagen(id){
+    getimagenID(id){
         return new Promise((resolve, reject) => {
-            db.all(querys.getimagen, [id], (err, rows) => {
+            db.all(querys.getimagenID, [id], (err, rows) => {
                 if(err) reject(err);
                 resolve(rows);
             })
@@ -84,9 +87,9 @@ module.exports = {
 
     insertimagen(url, producto_id, destacado){
         return new Promise((resolve, reject) => {
-            db.all(querys.insertimagen, [url, producto_id, destacado], (err) => {
+            db.run(querys.insertimagen, [url, producto_id, destacado], (err) => {
                 if(err) reject(err);
-                resolve(rows);
+                resolve();
             })
         })
     },
@@ -117,27 +120,27 @@ module.exports = {
             })
         })
     },
-    getcategory(id){
+    getcategoryID(id){
         return new Promise((resolve, reject) => {
-            db.all(querys.getcategory, [id], (err, rows) => {
+            db.all(querys.getcategoryID, [id], (err, rows) => {
                 if(err) reject(err);
                 resolve(rows);
             })
         })
     },
     
-    insertcategory(id, category_id, name){
+    insertcategory(name, id){
         return new Promise((resolve, reject) => {
-            db.all(querys.insertcategory, [category_id, name, id], (err) => {
+            db.all(querys.insertcategory, [name, id], (err) => {
                 if(err) reject(err);
                 resolve();
             })
         })
     },
 
-    updatecategory(id, category_id, name){
+    updatecategory(id, name){
         return new Promise((resolve, reject) => {
-            db.run(querys.updatecategory, [ category_id, name, id], (err) => {
+            db.run(querys.updatecategory, [name, id], (err) => {
                 if(err) reject(err);
                 resolve();
             })
