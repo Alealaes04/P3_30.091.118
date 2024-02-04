@@ -265,7 +265,7 @@ router.get('/register', (req,res)=> {
   res.render('register', {keypublic: process.env.KEYPUBLIC, error: error_recaptcha})
 })
 
-router.post('/register', (req, res) => {
+router.post('/register', async (req, res) => {
   const {name,email, password} = req.body;
   console.log(name, email, password);
 
