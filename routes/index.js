@@ -10,7 +10,7 @@ const tablas = require ('../db/models')
 //login
 let logged = false;
 let logeedin = false;
-
+let error_recaptcha = "";
 
 //Pago productos API 
 router.post('/payments', async (req, res, next)=>{
@@ -262,19 +262,32 @@ router.get('/pageini', (req, res) => {
 });
 
 router.get('/register', (req,res)=> {
-  res.render('register')
+  res.render('register', {keypublic: process.env.KEYPUBLIC, error: error_recaptcha})
 })
 
 router.post('/register', (req, res) => {
   const {name,email, password} = req.body;
   console.log(name, email, password);
-  db.register(name, email, password)
-  .then(() => {
-     res.redirect('pageini')
-  })
-  .catch(err => {
-    console.log(err);
-  })
+
+  const key = process.env.KEYPRIVATE;
+  const gRecaptchaResponse = req.body['g-recaptcha-response'];
+  const url = await fetch(`https://www.google.com/recaptcha/api/siteverify?secret=${key}&response=${gRecaptchaResponse}`, {
+      method: 'POST',
+  });
+  const captcha = await url.json();
+  if (captcha.success == true) {
+
+    db.register(name, email, password)
+    .then(() => {
+        res.redirect('pageini')
+    })
+    .catch(err => {
+      console.log(err);
+    })
+  }else{
+    error_recaptcha = "<h3 style='color: red;'>Ocurrió un error, intente nuevamente</h3>"
+    res.redirect('/register');
+  }
 });  
 
 router.get('/userini', (req,res)=> {
