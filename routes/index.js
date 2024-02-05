@@ -5,13 +5,13 @@ require('dotenv').config()
 var axios = require ('axios');
 const { Axios } = require('axios');
 const tablas = require ('../db/models')
-
+const nodemailer = require('nodemailer');
 
 //login
 let logged = false;
 let logeedin = false;
 let error_recaptcha = "";
-
+/*
 //Pago productos API 
 router.post('/payments', async (req, res, next)=>{
   var monto, moneda;
@@ -62,7 +62,7 @@ router.post('/payments', async (req, res, next)=>{
     res.render('pagofails');
   }
 })
-
+*/
 // compra
 router.get('/compra', (req, res) => {
   db.getproducto()
@@ -102,8 +102,8 @@ router.get('/pedidoprd/:id', function(req, res, next){
 
 
 
-router.post('/compra', function(req, res, next) {
-  let date = new Date();
+router.post('/payments/:producto/:id', function(req, res, next) {
+  /*let date = new Date();
   let Datetime = `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}`;
   let fecha = Datetime;
   let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
@@ -123,20 +123,75 @@ router.post('/compra', function(req, res, next) {
     console.log(`El precio del producto ${producto_id} es: ${precio}`);
    
     let total_pagado = precio * cantidad;
-    console.log(`El resultado de la multiplicación es: ${total_pagado}`);
+    console.log(`El resultado de la multiplicación es: ${total_pagado}`); */
 
-    db.insertcompra(cliente_id, producto_id, cantidad, total_pagado, fecha, ip_cliente)
-    .then(() => {
-       res.redirect('payments')
-    })
-    .catch(err => {
-      console.log(err);
-    })
+    const { product, id } = req.params;
+    const { full_name, email, card_number, experition_month, experition_year, cvv, currency, amount, count, description } = req.body;
+    const fecha = new Date();
+    const fechaC = fecha.toString();
+    const ipPaymentClient = (req.headers['x-forwarded-for'] || '').split(',')[0] || req.connection.remoteAddress;
+    try {
+        const response = await fetch('https://fakepayment.onrender.com/payments', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiSm9obiBEb2UiLCJkYXRlIjoiMjAyNC0wMS0xM1QwNzoyMzozNC42ODNaIiwiaWF0IjoxNzA1MTMwNjE0fQ.iDAk-6xC9ForjFuGCQtSZ0L9J-HicwBsyqwoS8RTJoE`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                "amount": amount,
+                "card-number": tarjeta,
+                "cvv": cvv,
+                "expiration-month": experition_month,
+                "expiration-year": experition_year,
+                "full-name": "APPROVED",
+                "currency": currency,
+                "description": "Transsaction Successfull",
+                "reference": "payment_id:25"
+            })
+        });
+        let total_pagado = amount * count;
+        let cliente_id = null;
+        db.getuserEmail(email)
+          .then((data)=>{
+            cliente_id = data[0].id
+            db.insertcompra(cliente_id, id, count, total_pagado, fechaC, ipPaymentClient)
+                .then(()=> {
+                    const transporter = nodemailer.createTransport({
+                    host: process.env.HOST,
+                    port: 587,
+                    auth: {
+                        user: process.env.EMAIL,
+                        pass: process.env.PASS
+                    }
+                  });
+                  const mailOptions = {
+                    from: 'keyboardsstore@gmail.com',
+                    to: [email],
+                    subject: 'Compra completada',
+                    text: `Producto: ${producto}
+                    Cantidad: ${count}
+                    Fecha de compra: ${fechaC}
+                    Total de la compra: ${total_pagado}$`
+                  };
+                  transporter.sendMail(mailOptions, (error, info)=>{
+                    if (error) {
+                        console.log(error);
+                    } else {
+                      console.log('Correo electrónico enviado a: ' + email + ' ' + info.response);
+                    }
+                  });
 
-  });
- 
-})
+                res.redirect('/')
+            });
+          }).catch((err)=>{
+            console.log(err);
+            req.send('Correo no coincido con el usuario registrado')
+          })
+    } catch (error) {
+        console.log(error)
+    }
 
+});
 
 router.get('/tabcliente', (req, res) => {
   db.getuser()
@@ -150,15 +205,18 @@ router.get('/tabcliente', (req, res) => {
 
 });
 
-router.get('/payments', (req, res) => {
-  res.render('payments')
-  });
+router.get('/payments/:producto/:id', (req, res) => {
+  const { producto, id } = req.params;
+  db.getproductoID(id)
+    .then((data) =>{
+      res.render('payments', {producto: producto, monto: data[0].price, id:id});
+    })
+    .catch((err)=>{
+      console.log(err);
+      res.render('payments', {producto: "Error", monto: "Error", id:""})
+    })
 
-  router.get('/paga', (req, res) => {
-    res.render('paga')
-    });
-
-
+});
 
 
   router.get('/filterslog', (req, res) => {

@@ -2,6 +2,7 @@ const db = require('./connection');
 
 let querys = {
     getuser:'SELECT * FROM usuarios',
+    getuserEmail:'SELECT * FROM usuarios WHERE email = ?',
     register:'INSERT INTO usuarios(name, email, password) VALUES(?, ?, ?)',
     getproducto: 'SELECT * FROM producto',
     getproductoID: 'SELECT * FROM producto WHERE id = ?',
@@ -65,6 +66,15 @@ module.exports = {
         })
 
     
+    },
+
+    getuserEmail(email){
+        return new Promise((resolve, reject)=>{
+            db.all(querys.getuserEmail, [email], (err,rows)=>{
+                if(err) reject(err);
+                resolve(rows);
+            })
+        })
     },
 
     register(name, email, password){
