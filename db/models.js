@@ -67,7 +67,6 @@ module.exports = {
 
     
     },
-
     getuserEmail(email){
         return new Promise((resolve, reject)=>{
             db.all(querys.getuserEmail, [email], (err,rows)=>{
