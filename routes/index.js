@@ -337,6 +337,27 @@ router.post('/register', async (req, res) => {
 
     db.register(name, email, password)
     .then(() => {
+        const transporter = nodemailer.createTransport({
+          host: process.env.HOST,
+          port: 587,
+          auth: {
+              user: process.env.EMAIL,
+              pass: process.env.PASS
+          }
+        });
+        const mailOptions = {
+          from: 'keyboardsstore@gmail.com',
+          to: [email],
+          subject: 'Bienvenido ' + name,
+          text: `Registro completado`
+        };
+        transporter.sendMail(mailOptions, (error, info)=>{
+          if (error) {
+              console.log(error);
+          } else {
+            console.log('Correo electrónico enviado a: ' + email + ' ' + info.response);
+          }
+        });
         res.redirect('pageini')
     })
     .catch(err => {
