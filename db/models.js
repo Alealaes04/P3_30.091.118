@@ -21,7 +21,8 @@ let querys = {
     deletecategory: 'DELETE FROM category WHERE id = ?',
     consultable: 'SELECT producto.id AS producto_id, producto.name AS producto_name, producto.price AS price, producto.description AS description, imagen.url AS imagen_url, category.name AS category_name FROM category INNER JOIN producto ON category.id = producto.category_id INNER JOIN imagen ON imagen.id = producto.id',
     getdetalles: 'SELECT producto.id AS producto_id, producto.name AS producto_name, producto.code AS producto_code, producto.price AS price, producto.description AS description, category.name AS category_name, producto.brand AS brand, producto.model AS model, imagen.url AS imagen_url, imagen.id AS imagen_id FROM producto INNER JOIN category ON category.id = producto.category_id INNER JOIN imagen ON imagen.id = producto.id',
-    getcompra: 'SELECT * FROM compras'
+    getcompra: 'SELECT * FROM compra',
+    insertcompra: 'INSERT INTO compra(cliente_id, producto_id, cantidad, total_pagado, fecha, ip_cliente) VALUES(?,?,?,?,?,?)'
     
 }
 module.exports = {
