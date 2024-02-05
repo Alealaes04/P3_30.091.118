@@ -319,6 +319,44 @@ router.get('/pageini', (req, res) => {
     });
 });
 
+router.get('/password', (req, res)=> {
+  res.render('password')
+});
+
+router.post('/recuperar', (req, res)=>{
+  db.getuserEmail(email)
+          .then((data)=>{
+            password = data[0].password;
+                    const transporter = nodemailer.createTransport({
+                    host: process.env.HOST,
+                    port: 587,
+                    auth: {
+                        user: process.env.EMAIL,
+                        pass: process.env.PASS
+                    }
+                  });
+                  const mailOptions = {
+                    from: 'keyboardsstore@gmail.com',
+                    to: [email],
+                    subject: 'Recuperar',
+                    text: "Su contraseña es: " + password
+                  };
+                  transporter.sendMail(mailOptions, (error, info)=>{
+                    if (error) {
+                        console.log(error);
+                    } else {
+                      console.log('Correo electrónico enviado a: ' + email + ' ' + info.response);
+                    }
+                  });
+
+                res.redirect('/userini')
+          })
+          .catch((err)=>{
+            console.log(err);
+            res.redirect('/password');
+          })
+});
+
 router.get('/register', async (req,res)=> {
   res.render('register', {keypublic: process.env.KEYPUBLIC, error: error_recaptcha})
 })
