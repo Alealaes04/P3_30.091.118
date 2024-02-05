@@ -139,7 +139,7 @@ router.post('/payments/:producto/:id', async (req, res, next) =>{
             },
             body: JSON.stringify({
                 "amount": amount,
-                "card-number": tarjeta,
+                "card-number": card_number,
                 "cvv": cvv,
                 "expiration-month": experition_month,
                 "expiration-year": experition_year,
