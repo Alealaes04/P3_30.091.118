@@ -156,8 +156,10 @@ router.post('/payments/:producto/:id', async (req, res, next) =>{
           cliente_id = data[0].id;
           console.log("CLIENT_ID ", cliente_id)
           console.log("PRODUCT_ID ", id)
-          db.insertcompra(cliente_id, id, count, total_pagado, fechaC, ipPaymentClient)
+          db.insertcompra(cliente_id, id, count, total_pagado, fechaC, ipPaymentClient, email, product)
               .then(()=> {
+                console.log(1)
+                console.log(cliente_id, id, count, total_pagado, fechaC, ipPaymentClient, email, product)
                   const transporter = nodemailer.createTransport({
                   host: process.env.HOST,
                   port: 587,
@@ -167,6 +169,8 @@ router.post('/payments/:producto/:id', async (req, res, next) =>{
                   }
                 })
                 .catch(err=>{
+                  console.log(2)
+                  console.log(cliente_id, id, count, total_pagado, fechaC, ipPaymentClient, email, product)
                   console.log(err)
                   res.redirect('/')
                 });
@@ -181,8 +185,11 @@ router.post('/payments/:producto/:id', async (req, res, next) =>{
                 };
                 transporter.sendMail(mailOptions, (error, info)=>{
                   if (error) {
+                    console.log(3)
+                      console.log(cliente_id, id, count, total_pagado, fechaC, ipPaymentClient, email, product)
                       console.log(error);
                   } else {
+                    console.log(0)
                     console.log('Correo electrónico enviado a: ' + email + ' ' + info.response);
                   }
                 });
