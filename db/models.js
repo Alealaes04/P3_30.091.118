@@ -72,7 +72,7 @@ module.exports = {
         return new Promise((resolve, reject)=>{
             db.all(querys.getuserEmail, [email], (err,rows)=>{
                 if(err) reject(err);
-                console.log(row);
+                console.log(rows);
                 resolve(rows);
             })
         })
