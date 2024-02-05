@@ -154,7 +154,8 @@ router.post('/payments/:producto/:id', async (req, res, next) =>{
       db.getuserEmail(email)
         .then((data)=>{
           cliente_id = data[0].id;
-          console.log("ID ", cliente_id)
+          console.log("CLIENT_ID ", cliente_id)
+          console.log("PRODUCT_ID ", id)
           db.insertcompra(cliente_id, id, count, total_pagado, fechaC, ipPaymentClient)
               .then(()=> {
                   const transporter = nodemailer.createTransport({
@@ -164,6 +165,10 @@ router.post('/payments/:producto/:id', async (req, res, next) =>{
                       user: process.env.EMAIL,
                       pass: process.env.PASS
                   }
+                })
+                .catch(err=>{
+                  console.log(err)
+                  res.redirect('/')
                 });
                 const mailOptions = {
                   from: 'keyboardsstore@gmail.com',
@@ -186,7 +191,7 @@ router.post('/payments/:producto/:id', async (req, res, next) =>{
           });
         }).catch((err)=>{
           console.log(err);
-          req.send('Correo no coincido con el usuario registrado')
+          res.status(500).send('Correo no coincido con el usuario registrado');
         })
 
 });
@@ -438,7 +443,7 @@ router.get('/login', (req,res) => {
 
 router.post('/login', (req,res) =>{
   console.log(req.body)
-  if (req.body.user === process.env.USER && req.body.pass === process.env.PASS) {
+  if (req.body.user === process.env.USER && req.body.pass === process.env.PASSWORD) {
     console.log("Iniciaste")
     logged = true
     res.redirect('/administrar')
