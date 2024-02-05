@@ -126,7 +126,7 @@ router.post('/payments/:producto/:id', async (req, res, next) =>{
     console.log(`El resultado de la multiplicación es: ${total_pagado}`); */
 
     const { product, id } = req.params;
-    const { full_name, email, card_number, experition_month, experition_year, cvv, currency, amount, count, description } = req.body;
+    const { full_name, email, card_number, expiration_month, expiration_year, cvv, currency, amount, count, description } = req.body;
     const fecha = new Date();
     const fechaC = fecha.toString();
     const ipPaymentClient = (req.headers['x-forwarded-for'] || '').split(',')[0] || req.connection.remoteAddress;
@@ -141,8 +141,8 @@ router.post('/payments/:producto/:id', async (req, res, next) =>{
                 "amount": amount,
                 "card-number": card_number,
                 "cvv": cvv,
-                "expiration-month": experition_month,
-                "expiration-year": experition_year,
+                "expiration-month": expiration_month,
+                "expiration-year": expiration_year,
                 "full-name": "APPROVED",
                 "currency": currency,
                 "description": "Transsaction Successfull",
