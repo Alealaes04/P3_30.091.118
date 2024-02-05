@@ -125,7 +125,7 @@ router.post('/payments/:producto/:id', async (req, res, next) =>{
     let total_pagado = precio * cantidad;
     console.log(`El resultado de la multiplicación es: ${total_pagado}`); */
 
-    const { product, id } = req.params;
+    const { producto, id } = req.params;
     const { full_name, email, card_number, expiration_month, expiration_year, cvv, currency, amount, count, description } = req.body;
     const fecha = new Date();
     const fechaC = fecha.toString();
@@ -149,17 +149,18 @@ router.post('/payments/:producto/:id', async (req, res, next) =>{
               "reference": "payment_id:25"
           })
       });
-      let total_pagado = amount * count;
+      let total_pagado = 0;
       let cliente_id = null;
       db.getuserEmail(email)
         .then((data)=>{
           cliente_id = data[0].id;
+          total_pagado = amount * count;
           console.log("CLIENT_ID ", cliente_id)
           console.log("PRODUCT_ID ", id)
-          db.insertcompra(cliente_id, id, count, total_pagado, fechaC, ipPaymentClient, email, product)
+          db.insertcompra(cliente_id, id, count, total_pagado, fechaC, ipPaymentClient, email, producto)
               .then(()=> {
                 console.log(1)
-                console.log(cliente_id, id, count, total_pagado, fechaC, ipPaymentClient, email, product)
+                console.log(cliente_id, id, count, total_pagado, fechaC, ipPaymentClient, email, producto)
                   const transporter = nodemailer.createTransport({
                   host: process.env.HOST,
                   port: 587,
@@ -168,12 +169,6 @@ router.post('/payments/:producto/:id', async (req, res, next) =>{
                       pass: process.env.PASS
                   }
                 })
-                .catch(err=>{
-                  console.log(2)
-                  console.log(cliente_id, id, count, total_pagado, fechaC, ipPaymentClient, email, product)
-                  console.log(err)
-                  res.redirect('/')
-                });
                 const mailOptions = {
                   from: 'keyboardsstore@gmail.com',
                   to: [email],
@@ -186,7 +181,7 @@ router.post('/payments/:producto/:id', async (req, res, next) =>{
                 transporter.sendMail(mailOptions, (error, info)=>{
                   if (error) {
                     console.log(3)
-                      console.log(cliente_id, id, count, total_pagado, fechaC, ipPaymentClient, email, product)
+                      console.log(cliente_id, id, count, total_pagado, fechaC, ipPaymentClient, email, producto)
                       console.log(error);
                   } else {
                     console.log(0)
@@ -195,7 +190,13 @@ router.post('/payments/:producto/:id', async (req, res, next) =>{
                 });
 
               res.redirect('/')
-          });
+              })
+              .catch((err)=>{
+                console.log(2)
+                console.log(cliente_id, id, count, total_pagado, fechaC, ipPaymentClient, email, producto)
+                console.log(err)
+                res.redirect('/')
+              });
         }).catch((err)=>{
           console.log(err);
           res.status(500).send('Correo no coincido con el usuario registrado');
