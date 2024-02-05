@@ -130,66 +130,64 @@ router.post('/payments/:producto/:id', async (req, res, next) =>{
     const fecha = new Date();
     const fechaC = fecha.toString();
     const ipPaymentClient = (req.headers['x-forwarded-for'] || '').split(',')[0] || req.connection.remoteAddress;
-    try {
-        const response = await fetch('https://fakepayment.onrender.com/payments', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiSm9obiBEb2UiLCJkYXRlIjoiMjAyNC0wMS0xM1QwNzoyMzozNC42ODNaIiwiaWF0IjoxNzA1MTMwNjE0fQ.iDAk-6xC9ForjFuGCQtSZ0L9J-HicwBsyqwoS8RTJoE`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                "amount": amount,
-                "card-number": card_number,
-                "cvv": cvv,
-                "expiration-month": expiration_month,
-                "expiration-year": expiration_year,
-                "full-name": "APPROVED",
-                "currency": currency,
-                "description": "Transsaction Successfull",
-                "reference": "payment_id:25"
-            })
-        });
-        let total_pagado = amount * count;
-        let cliente_id = null;
-        db.getuserEmail(email)
-          .then((data)=>{
-            cliente_id = data[0].id
-            db.insertcompra(cliente_id, id, count, total_pagado, fechaC, ipPaymentClient)
-                .then(()=> {
-                    const transporter = nodemailer.createTransport({
-                    host: process.env.HOST,
-                    port: 587,
-                    auth: {
-                        user: process.env.EMAIL,
-                        pass: process.env.PASS
-                    }
-                  });
-                  const mailOptions = {
-                    from: 'keyboardsstore@gmail.com',
-                    to: [email],
-                    subject: 'Compra completada',
-                    text: `Producto: ${producto}
-                    Cantidad: ${count}
-                    Fecha de compra: ${fechaC}
-                    Total de la compra: ${total_pagado}$`
-                  };
-                  transporter.sendMail(mailOptions, (error, info)=>{
-                    if (error) {
-                        console.log(error);
-                    } else {
-                      console.log('Correo electrónico enviado a: ' + email + ' ' + info.response);
-                    }
-                  });
 
-                res.redirect('/')
-            });
-          }).catch((err)=>{
-            console.log(err);
-            req.send('Correo no coincido con el usuario registrado')
+      const response = await fetch('https://fakepayment.onrender.com/payments', {
+          method: 'POST',
+          headers: {
+              'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiSm9obiBEb2UiLCJkYXRlIjoiMjAyNC0wMS0xM1QwNzoyMzozNC42ODNaIiwiaWF0IjoxNzA1MTMwNjE0fQ.iDAk-6xC9ForjFuGCQtSZ0L9J-HicwBsyqwoS8RTJoE`,
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+              "amount": amount,
+              "card-number": card_number,
+              "cvv": cvv,
+              "expiration-month": expiration_month,
+              "expiration-year": expiration_year,
+              "full-name": "APPROVED",
+              "currency": currency,
+              "description": "Transsaction Successfull",
+              "reference": "payment_id:25"
           })
-    } catch (error) {
-        console.log(error)
-    }
+      });
+      let total_pagado = amount * count;
+      let cliente_id = null;
+      db.getuserEmail(email)
+        .then((data)=>{
+          cliente_id = data[0].id;
+          console.log("ID ", cliente_id)
+          db.insertcompra(cliente_id, id, count, total_pagado, fechaC, ipPaymentClient)
+              .then(()=> {
+                  const transporter = nodemailer.createTransport({
+                  host: process.env.HOST,
+                  port: 587,
+                  auth: {
+                      user: process.env.EMAIL,
+                      pass: process.env.PASS
+                  }
+                });
+                const mailOptions = {
+                  from: 'keyboardsstore@gmail.com',
+                  to: [email],
+                  subject: 'Compra completada',
+                  text: `Producto: ${producto}
+                  Cantidad: ${count}
+                  Fecha de compra: ${fechaC}
+                  Total de la compra: ${total_pagado}$`
+                };
+                transporter.sendMail(mailOptions, (error, info)=>{
+                  if (error) {
+                      console.log(error);
+                  } else {
+                    console.log('Correo electrónico enviado a: ' + email + ' ' + info.response);
+                  }
+                });
+
+              res.redirect('/')
+          });
+        }).catch((err)=>{
+          console.log(err);
+          req.send('Correo no coincido con el usuario registrado')
+        })
 
 });
 
