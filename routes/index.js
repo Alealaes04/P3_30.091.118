@@ -102,7 +102,7 @@ router.get('/pedidoprd/:id', function(req, res, next){
 
 
 
-router.post('/payments/:producto/:id', function(req, res, next) {
+router.post('/payments/:producto/:id', async (req, res, next) =>{
   /*let date = new Date();
   let Datetime = `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}`;
   let fecha = Datetime;
@@ -319,7 +319,7 @@ router.get('/pageini', (req, res) => {
     });
 });
 
-router.get('/register', (req,res)=> {
+router.get('/register', async (req,res)=> {
   res.render('register', {keypublic: process.env.KEYPUBLIC, error: error_recaptcha})
 })
 
